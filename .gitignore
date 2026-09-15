@@ -1,0 +1,12 @@
+# Your WHOOP data never goes in the repo. Code and aggregate results only.
+data/
+*.csv
+*.json.gz
+.env
+*.db
+
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.DS_Store
