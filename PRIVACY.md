@@ -35,16 +35,23 @@ data files.
 
 ## What leaves your computer
 
-Two things, and only these:
+**Always:** requests to the WHOOP API, to fetch your own data, authorised by
+you. Nothing else is sent anywhere by default.
 
-1. **Requests to the WHOOP API**, to fetch your own data, authorised by you.
-2. **Text sent to a large language model provider (Anthropic).** Evaluating
-   coaching advice requires asking a model to produce that advice. Prompts may
-   therefore contain your health metrics and log entries. This is the one way
-   your data reaches a third party, and it is inherent to what the tool does. If
-   you are not comfortable with that, do not use this tool.
+**Only if you configure a hosted model:** evaluating coaching advice requires
+asking a model to produce that advice, and that model can run in one of two
+places.
 
-Nothing is sold, shared, or transmitted to anyone else.
+- **Locally** (the default — an open-weights model on your own machine): no
+  health data leaves your computer at any point. The WHOOP API call is the only
+  outbound request the tool makes.
+- **Through a hosted provider**, if you choose to configure one: prompts sent to
+  that provider may contain your health metrics and log entries. That is a real
+  transfer of health data to a third party, governed by their privacy terms
+  rather than this one. It happens only if you supply an API key for such a
+  provider; with no key configured, it cannot happen.
+
+Nothing is sold, shared, or transmitted to anyone else under either setup.
 
 ## Retention and deletion
 
