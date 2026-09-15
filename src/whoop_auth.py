@@ -123,9 +123,37 @@ def access_token() -> str:
     return tokens["access_token"]
 
 
-def authorize() -> Path:
-    """Full consent flow. Opens a browser and waits for the single callback."""
+def _is_local(uri: str) -> bool:
+    return (urlparse(uri).hostname or "") in {"localhost", "127.0.0.1", "::1"}
+
+
+def _catch_locally() -> dict:
+    """Run a one-shot web server to catch WHOOP's redirect."""
     port = urlparse(REDIRECT_URI).port or 80
+    server = HTTPServer(("localhost", port), _CallbackHandler)
+    server.timeout = 300
+    server.handle_request()  # exactly one request, then stop listening
+    server.server_close()
+    return _CallbackHandler.result
+
+
+def _catch_by_paste() -> dict:
+    """For redirect URLs we cannot listen on, e.g. https://whoop.com.
+
+    WHOOP sends the browser to that address with ?code=... on the end. There is
+    nothing running there to catch it, so the address bar is the handoff.
+    """
+    print("Your redirect URL is not a local address, so nothing here can catch it.")
+    print("After approving, your browser lands on a page with ?code=... in the")
+    print("address bar. Copy that whole address and paste it below.\n")
+    pasted = input("Redirected URL: ").strip()
+    if not pasted:
+        return {}
+    return {k: v[0] for k, v in parse_qs(urlparse(pasted).query).items()}
+
+
+def authorize() -> Path:
+    """Full consent flow. One browser approval, then tokens are stored."""
     state = secrets.token_urlsafe(24)
 
     url = AUTH_URL + "?" + urlencode(
@@ -138,21 +166,29 @@ def authorize() -> Path:
         }
     )
 
+    # The commonest failure by far is a redirect URI that differs from the
+    # registered one by a slash or a scheme, so say exactly what is being sent.
+    print(f"Using redirect URI: {REDIRECT_URI}")
+    print("This must match a Redirect URL on your WHOOP app exactly — scheme,")
+    print("port and trailing slash included.\n")
     print("Opening WHOOP's consent screen in your browser...")
     print("If it does not open, paste this in yourself:\n")
     print(url + "\n")
     webbrowser.open(url)
 
-    server = HTTPServer(("localhost", port), _CallbackHandler)
-    server.timeout = 300
-    server.handle_request()  # exactly one request, then stop listening
-    server.server_close()
-
-    result = _CallbackHandler.result
+    result = _catch_locally() if _is_local(REDIRECT_URI) else _catch_by_paste()
     if not result:
-        raise SystemExit("Timed out waiting for WHOOP to redirect back.")
+        raise SystemExit("No response received from WHOOP.")
     if "code" not in result:
-        raise SystemExit(f"WHOOP returned an error: {result.get('error', result)}")
+        hint = ""
+        if "redirect" in str(result.get("hint", "") or result).lower():
+            hint = (
+                "\n\nThat is a redirect mismatch. Open your app in the WHOOP "
+                "developer dashboard, copy the Redirect URL exactly as it is "
+                "registered there, and set WHOOP_REDIRECT_URI in .env to that "
+                "same string."
+            )
+        raise SystemExit(f"WHOOP returned an error: {result.get('error', result)}{hint}")
     if result.get("state") != state:
         # Mismatched state means the response did not come from the request we
         # made, so the code is not trustworthy.
@@ -171,7 +207,9 @@ def authorize() -> Path:
     )
     if response.status_code != 200:
         raise SystemExit(
-            f"Token exchange failed (HTTP {response.status_code}): {response.text[:300]}"
+            f"Token exchange failed (HTTP {response.status_code}): {response.text[:300]}\n"
+            "If this mentions redirect_uri, it must match the value used in the "
+            "authorisation request and the one registered on your WHOOP app."
         )
 
     path = save_tokens(response.json())
