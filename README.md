@@ -7,8 +7,8 @@ data. It measures whether a coach with access to your real metrics and a memory
 of past advice outperforms a generic one, using a fixed set of questions a real
 member actually asks.
 
-> **Status: in progress.** The question set and rubric are written; the runner
-> and results are not. This README will lead with the finding once there is one.
+> **Status: in progress.** Question set written, API surveyed, first finding
+> below. Rubric and runner next.
 
 ## The question
 
@@ -16,14 +16,32 @@ Wearables produce a lot of data and increasingly ship an LLM coach on top of it.
 The assumption is that better models make better coaches. This measures that
 assumption.
 
-The early hypothesis, which fell out of writing the question set: **the binding
+The hypothesis, which fell out of writing the question set: **the binding
 constraint is missing data, not model quality.**
 
-Of the 18 real questions in [`evals/questions.md`](evals/questions.md), a
-wearable's own API can fully ground 7. The rest need a goal with a date, or a
-log of meals and symptoms — things no wrist-worn sensor captures. *"Am I in a
-calorie deficit today?"* is not a question a better model answers better. It is
-a question that cannot be answered correctly without knowing what you ate.
+Of the 18 real questions in [`evals/questions.md`](evals/questions.md), the
+official API can fully ground 7. *"Am I in a calorie deficit today?"* is not a
+question a better model answers better. It cannot be answered correctly without
+knowing what you ate, and no wrist-worn sensor knows that.
+
+### First finding: the gaps are not where you would guess
+
+Surveying the live API ([`evals/data-availability.md`](evals/data-availability.md))
+turned up three kinds of gap, and the third is the one that can hurt someone:
+
+1. **Absent.** No intake, no symptoms, no goals — and **WHOOP Age is not
+   exposed at all**, despite being a headline number members see daily and ask
+   about.
+2. **Sparse.** Workout distance is populated in 6% of workouts. An answer is
+   available some days and not others, with nothing signalling which.
+3. **Present but wrong.** One 16-minute running workout reported a distance of
+   179 metres. That is a GPS artifact, and nothing in the payload marks it as
+   one. A coach reasoning from it will state something false about the member's
+   fitness with complete confidence.
+
+The third gap produces a rubric dimension a generic coach cannot even be tested
+on, because it has no data to misread: **does the answer notice implausible
+data rather than reasoning from it?**
 
 ## Method
 
