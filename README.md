@@ -18,8 +18,8 @@ assumption: an evaluation harness, a fixed set of questions a real member
 actually asks, and a rubric with a safety gate.
 
 The work so far surveys what the WHOOP API exposes, and the result is that **the
-ceiling on coaching quality is set by the data, not the model.** Of 18 real
-questions, the official API can fully ground 7. The remaining 11 fail for
+ceiling on coaching quality is set by the data, not the model.** Of 19 real
+questions, the official API can fully ground 5. The remaining 14 fail for
 reasons no model improvement addresses.
 
 Three findings are below. The measured comparison between a grounded and an
@@ -36,6 +36,11 @@ These are real questions, taken from a member's own usage rather than invented
 for the study ([`evals/questions.md`](evals/questions.md)). The question here is
 not whether an LLM answers them fluently. It is whether the answers are **true,
 grounded and safe** — and what would have to change for them to be.
+
+Six of the nineteen look answerable from wearable data alone. Checking the API
+reduced that to five: the WHOOP Age question reads as perfectly groundable and
+is not, because the metric is not exposed. **You cannot tell what is groundable
+by reading the questions.**
 
 ## Method
 

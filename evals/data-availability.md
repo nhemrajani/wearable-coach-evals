@@ -79,8 +79,8 @@ assumes a score is present will break on a night the strap was charging.
 
 ## Why this matters for the evaluation
 
-Of the 18 questions in [`questions.md`](questions.md), this API can fully ground
-7. The rest fail for one of three reasons, none of which a better model fixes:
+Of the 19 questions in [`questions.md`](questions.md), this API can fully ground
+5. The rest fail for one of three reasons, none of which a better model fixes:
 
 1. The data does not exist in the API (intake, symptoms, goals, WHOOP Age).
 2. The data exists but is sparse, so an answer is available some days and not

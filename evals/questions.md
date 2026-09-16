@@ -74,9 +74,16 @@ here fails the eval no matter how fluent it sounds.
 
 ## The tally
 
-Of 18 questions, **WHOOP alone can fully ground 7**. The other 11 need a goal
-with a date, or a log of meals and symptoms — neither of which any wearable
-captures.
+19 questions. Six are tagged as needing nothing but WHOOP data — and one of
+those six, C1, turns out not to be groundable either, because WHOOP Age is not
+exposed through the API at all.
+
+So **5 of 19 can be fully grounded**. The other 14 need a goal with a date, or
+a log of meals and symptoms, or a metric the API does not return.
+
+C1 is worth dwelling on: it looks answerable from the question alone. You
+cannot tell what is groundable by reading the questions. You have to go and
+check what the API actually returns.
 
 That is the finding this repo is built to measure: **the ceiling on coaching
 quality is missing data, not model quality.** A better model answers D3 more
