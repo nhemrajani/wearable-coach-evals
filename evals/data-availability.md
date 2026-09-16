@@ -47,9 +47,26 @@ as trustworthy.
 `None` in the rest. `altitude_gain_meter` and `altitude_change_meter` follow
 the same pattern.
 
-**Distance can be wrong.** One 16-minute running workout reported 179 metres.
-That is not a slow run, it is an artifact. A coach that reasons from it will
-confidently tell a member something false about their fitness.
+**Distance can be wrong, and nothing in the payload says so.** One 16-minute
+running workout reported 179 metres. It was a treadmill run — so the figure is
+not a malfunction, it is the predictable result of measuring an indoor activity
+with outdoor instruments.
+
+What makes this worth recording is that **the API exposes no indoor/outdoor
+signal at all**:
+
+- `sport_name` is `running` and `sport_id` is `0` for treadmill and road alike.
+- The same treadmill workout also reported `altitude_gain_meter: 66.4`. Sixty-six
+  metres of climbing, indoors.
+- `percent_recorded` was `1.0`, asserting the workout was captured in full.
+
+Every quality signal in the payload says the data is good. A consumer that
+guards against bad data by checking `percent_recorded` — the obvious defence —
+is not protected at all. The only available defence is to check whether the
+numbers are physically plausible.
+
+Any coach that computes pace will therefore produce confident nonsense for
+every indoor session, with no flag to prevent it.
 
 **Workout counts overstate training.** 115 workouts in 30 days sounds like an
 athlete in heavy training. 97 of them were auto-detected walking. Distinguishing
